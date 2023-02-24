@@ -7,7 +7,7 @@ mod sphere;
 use canvas::Canvas;
 use color::Color;
 use light::{Light, LightType};
-use point3d::{DotProduct, Length, Point3D};
+use point3d::{Dot, Length, Point3D};
 use sphere::Sphere;
 
 use image::{codecs::png::PngEncoder, ColorType, ImageEncoder};
@@ -46,11 +46,12 @@ const SCENE: [Sphere; 4] = [
     Sphere {
         center: Point3D {
             x: 0.0,
-            y: -1.,
+            y: -1.0,
             z: 3.0,
         },
         radius: 1.0,
         color: Color(255, 0, 0),
+        specular: 500,
     },
     Sphere {
         center: Point3D {
@@ -60,6 +61,7 @@ const SCENE: [Sphere; 4] = [
         },
         radius: 1.0,
         color: Color(0, 0, 255),
+        specular: 500,
     },
     Sphere {
         center: Point3D {
@@ -69,6 +71,7 @@ const SCENE: [Sphere; 4] = [
         },
         radius: 1.0,
         color: Color(0, 255, 0),
+        specular: 10,
     },
     Sphere {
         center: Point3D {
@@ -78,48 +81,37 @@ const SCENE: [Sphere; 4] = [
         },
         radius: 5000.0,
         color: Color(255, 255, 0),
+        specular: 1000,
     },
 ];
 
-// the sphere equation
-// < P - C, P - C> = r^2
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let camera = Point3D::new(0.0, 0.0, 0.0);
 
-// ray meets sphere
-// <O + tD - C, O + tD - C> = r^2
-// CO = O - C
-// < CO + tD, CO +tD > = r^2
-// < CO, CO > + < tD, CO > + < CO, tD > + < tD, tD > = r^2
-// < tD, tD > + 2 < CO, tD > + < CO, CO > = r^2
-// t^2 < D, D > + 2 t < CO, D > + < CO, CO > - r^2 = 0
+    let mut canvas = Canvas::new(600, 600);
+    for x in (-(canvas.width as isize) / 2)..(canvas.width as isize / 2) {
+        for y in (-(canvas.height as isize) / 2)..(canvas.height as isize / 2) {
+            // direction of ray
+            let direction = canvas.to_viewport(camera, x, y);
 
-// a = < D, D >
-// b = 2 < CO, D >
-// c = < CO, CO > - r^2
-// at^2 + bt + c = 0
-// {t_1, t_2} = ( -b +- sqrt(b^2 - 4ac) ) / 2a
-fn intersect_ray_sphere(o: Point3D, d: Point3D, sphere: &Sphere) -> Option<(f64, f64)> {
-    let oc = o.clone() - sphere.center;
+            // color
+            let color = trace_ray(camera, direction, 1.0, 1000000.0);
 
-    let a = d.dot_product(&d);
-    let b = 2.0 * oc.dot_product(&d);
-    let c = oc.dot_product(&oc) - sphere.radius * sphere.radius;
-
-    let discriminant = b * b - 4.0 * a * c;
-
-    // no intersection
-    if discriminant < 0.0 {
-        return None;
+            canvas.put_pixel(x, y, color)
+        }
     }
 
-    //
-    let t_1 = (-b + discriminant.sqrt()) / (2.0 * a);
-    let t_2 = (-b - discriminant.sqrt()) / (2.0 * a);
+    write_image(
+        "test.png",
+        &canvas.to_pixels(),
+        (canvas.width, canvas.height),
+    )?;
 
-    Some((t_1, t_2))
+    Ok(())
 }
 
 fn trace_ray(o: Point3D, d: Point3D, t_min: f64, t_max: f64) -> Color {
-    let mut t_closest = 100000.0; // really large number
+    let mut t_closest = std::f64::INFINITY;
     let mut sphere_closest = None;
 
     for sphere in SCENE.iter() {
@@ -141,26 +133,53 @@ fn trace_ray(o: Point3D, d: Point3D, t_min: f64, t_max: f64) -> Color {
             let normal = sphere.normal(p);
 
             // sphere.color
-            sphere.color * compute_lighting(p, normal)
+            sphere.color * compute_lighting(p, normal, -1.0 * d, sphere.specular)
         }
         None => Color::default(),
     }
 }
 
-fn write_image(
-    filename: &str,
-    pixels: &[u8],
-    bounds: (usize, usize),
-) -> Result<(), std::io::Error> {
-    let output = File::create(filename)?;
-    let encoder = PngEncoder::new(output);
-    encoder
-        .write_image(pixels, bounds.0 as u32, bounds.1 as u32, ColorType::Rgb8)
-        .unwrap();
-    Ok(())
+/// the ray equation
+/// P = O + t(V - O) = O + tD
+/// -inf < t < +inf
+/// the sphere equation
+/// < P - C, P - C> = r^2
+///
+/// ray meets sphere
+/// <O + tD - C, O + tD - C> = r^2
+/// CO = O - C
+/// < CO + tD, CO +tD > = r^2
+/// < CO, CO > + < tD, CO > + < CO, tD > + < tD, tD > = r^2
+/// < tD, tD > + 2 < CO, tD > + < CO, CO > = r^2
+/// t^2 < D, D > + 2 t < CO, D > + < CO, CO > - r^2 = 0
+///
+/// a = < D, D >
+/// b = 2 < CO, D >
+/// c = < CO, CO > - r^2
+/// at^2 + bt + c = 0
+/// {t_1, t_2} = ( -b +- sqrt(b^2 - 4ac) ) / 2a
+fn intersect_ray_sphere(o: Point3D, d: Point3D, sphere: &Sphere) -> Option<(f64, f64)> {
+    let oc = o - sphere.center;
+
+    let a = d.dot(&d);
+    let b = 2.0 * oc.dot(&d);
+    let c = oc.dot(&oc) - sphere.radius * sphere.radius;
+
+    let discriminant = b * b - 4.0 * a * c;
+
+    // no intersection
+    if discriminant < 0.0 {
+        return None;
+    }
+
+    // compute solutions
+    let t_1 = (-b + discriminant.sqrt()) / (2.0 * a);
+    let t_2 = (-b - discriminant.sqrt()) / (2.0 * a);
+
+    Some((t_1, t_2))
 }
 
-fn compute_lighting(point: Point3D, normal: Point3D) -> f64 {
+fn compute_lighting(point: Point3D, normal: Point3D, v: Point3D, s: i32) -> f64 {
     let mut intensity = 0.0;
 
     for light in LIGHTS {
@@ -173,10 +192,20 @@ fn compute_lighting(point: Point3D, normal: Point3D) -> f64 {
                     light.point.unwrap()
                 };
 
-                let dot = normal.dot_product(&l);
+                // diffuse
+                let dot_nl = normal.dot(&l);
+                if dot_nl > 0.0 {
+                    intensity += light.intensity * dot_nl / (normal.length() * l.length());
+                }
 
-                if dot > 0.0 {
-                    intensity += light.intensity * dot / (normal.length() * l.length());
+                // specular
+                if s != -1 {
+                    let r = 2.0 * normal * dot_nl - l;
+                    let dot_rv = r.dot(&v);
+                    if dot_rv > 0.0 {
+                        intensity +=
+                            light.intensity * f64::powi(dot_rv / (r.length() * v.length()), s);
+                    }
                 }
             }
         }
@@ -185,30 +214,16 @@ fn compute_lighting(point: Point3D, normal: Point3D) -> f64 {
     intensity
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let camera = Point3D::new(0.0, 0.0, 0.0);
-
-    let mut canvas = Canvas::new(600, 600);
-    for x in (-(canvas.width as isize) / 2)..(canvas.width as isize / 2) {
-        for y in (-(canvas.height as isize) / 2)..(canvas.height as isize / 2) {
-            // the ray equation
-            // P = O + t(V - O) = O + tD
-            // -inf < t < +inf
-
-            // direction of ray
-            let direction = canvas.to_viewport(camera, x, y);
-
-            let color = trace_ray(camera, direction, 1.0, 1000000.0);
-
-            canvas.put_pixel(x, y, color)
-        }
-    }
-
-    write_image(
-        "test.png",
-        &canvas.to_pixels(),
-        (canvas.width, canvas.height),
-    )?;
-
+/// produce image of scene
+fn write_image(
+    filename: &str,
+    pixels: &[u8],
+    bounds: (usize, usize),
+) -> Result<(), std::io::Error> {
+    let output = File::create(filename)?;
+    let encoder = PngEncoder::new(output);
+    encoder
+        .write_image(pixels, bounds.0 as u32, bounds.1 as u32, ColorType::Rgb8)
+        .unwrap();
     Ok(())
 }

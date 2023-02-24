@@ -5,6 +5,7 @@ pub struct Sphere {
     pub center: Point3D, // center of sphere
     pub radius: f64,     // radius of sphere
     pub color: Color,
+    pub specular: i32, // shininess
 }
 
 // P is any point on the sphere surface

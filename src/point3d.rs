@@ -1,9 +1,9 @@
 use std::ops::{Add, Mul, Sub};
 
-pub trait DotProduct {
+pub trait Dot {
     type Output;
 
-    fn dot_product(&self, rhs: &Self) -> Self::Output;
+    fn dot(&self, rhs: &Self) -> Self::Output;
 }
 
 pub trait Length {
@@ -59,6 +59,14 @@ impl Mul<Point3D> for f64 {
     }
 }
 
+impl Mul<f64> for Point3D {
+    type Output = Point3D;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        rhs * self
+    }
+}
+
 impl Sub for Point3D {
     type Output = Self;
 
@@ -71,10 +79,10 @@ impl Sub for Point3D {
     }
 }
 
-impl DotProduct for Point3D {
+impl Dot for Point3D {
     type Output = f64;
 
-    fn dot_product(&self, rhs: &Self) -> Self::Output {
+    fn dot(&self, rhs: &Self) -> Self::Output {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 }
@@ -83,6 +91,6 @@ impl Length for Point3D {
     type Output = f64;
 
     fn length(&self) -> Self::Output {
-        self.dot_product(self).sqrt()
+        self.dot(self).sqrt()
     }
 }
