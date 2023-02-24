@@ -7,7 +7,7 @@ mod sphere;
 use canvas::Canvas;
 use color::Color;
 use light::{Light, LightType};
-use point3d::{Dot, Length, Point3D};
+use point3d::{Dot, Length, Point3D, Rotate};
 use sphere::Sphere;
 
 use image::{codecs::png::PngEncoder, ColorType, ImageEncoder};
@@ -24,82 +24,79 @@ const LIGHTS: [Light; 3] = [
     Light {
         typ: LightType::Point,
         intensity: 0.6,
-        point: Some(Point3D {
-            x: 2.0,
-            y: 1.0,
-            z: 0.0,
-        }),
+        point: Some(Point3D::new_const(2.0, 1.0, 0.0)),
     },
     Light {
         typ: LightType::Directional,
         intensity: 0.2,
-        point: Some(Point3D {
-            x: 1.0,
-            y: 4.0,
-            z: 4.0,
-        }),
+        point: Some(Point3D::new_const(1.0, 4.0, 4.0)),
     },
 ];
 
 /// hard-code scene as a couple of spheres
 const SCENE: [Sphere; 4] = [
     Sphere {
-        center: Point3D {
-            x: 0.0,
-            y: -1.0,
-            z: 3.0,
-        },
+        center: Point3D::new_const(0.0, -1.0, 3.0),
         radius: 1.0,
         color: Color(255, 0, 0),
         specular: 500,
         reflective: 0.2,
     },
     Sphere {
-        center: Point3D {
-            x: 2.0,
-            y: 0.0,
-            z: 4.0,
-        },
+        center: Point3D::new_const(2.0, 0.0, 4.0),
         radius: 1.0,
         color: Color(0, 0, 255),
         specular: 500,
         reflective: 0.3,
     },
     Sphere {
-        center: Point3D {
-            x: -2.0,
-            y: 0.0,
-            z: 4.0,
-        },
+        center: Point3D::new_const(-2.0, 0.0, 4.0),
         radius: 1.0,
         color: Color(0, 255, 0),
         specular: 10,
         reflective: 0.4,
     },
     Sphere {
-        center: Point3D {
-            x: 0.0,
-            y: -5001.0,
-            z: 0.0,
-        },
+        center: Point3D::new_const(0.0, -5001.0, 0.0),
         radius: 5000.0,
         color: Color(255, 255, 0),
         specular: 1000,
         reflective: 0.5,
     },
+    // Sphere {
+    //     center: Point3D::new_const(0.0, 1.5, 4.0),
+    //     radius: 0.5,
+    //     color: Color(0, 255, 255),
+    //     specular: 1000,
+    //     reflective: 0.1,
+    // },
 ];
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let camera = Point3D::new(0.0, 0.0, 0.0);
+/// Conceptually, an "infinitesimaly small" real number.
+const EPS: f64 = 0.001;
 
+const CAMERA: Point3D = Point3D::new_const(3.0, 0.0, 1.0);
+// const CAMERA: Point3D = Point3D::new_const(0.0, 0.0, 0.0);
+
+const ROTATION: [[f64; 3]; 3] = [
+    [0.7071, 0.0, -0.7071],
+    [0.0, 1.0, 0.0],
+    [0.7071, 0.0, 0.7071],
+];
+// const ROTATION: [[f64; 3]; 3] = [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]];
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut canvas = Canvas::new(600, 600);
     for x in (-(canvas.width as isize) / 2)..(canvas.width as isize / 2) {
         for y in (-(canvas.height as isize) / 2)..(canvas.height as isize / 2) {
             // direction of ray
-            let direction = canvas.to_viewport(camera, x, y);
+            let mut direction = canvas.to_viewport(x, y);
+
+            // rotate direction
+            direction.rotate(ROTATION);
 
             // color
-            let color = trace_ray(camera, direction, 1.0, std::f64::INFINITY, 3);
+            let color = trace_ray(CAMERA, direction, 1.0, std::f64::INFINITY, 3);
 
             canvas.put_pixel(x, y, color)
         }
@@ -213,8 +210,8 @@ fn compute_lighting(point: Point3D, normal: Point3D, v: Point3D, s: i32) -> f64 
                     (light.point.unwrap(), std::f64::INFINITY)
                 };
 
-                // // shadow check
-                let (sphere_shadow, _) = closest_intersection(point, l, 0.001, t_max);
+                // shadow check
+                let (sphere_shadow, _) = closest_intersection(point, l, EPS, t_max);
                 if sphere_shadow.is_some() {
                     continue;
                 }

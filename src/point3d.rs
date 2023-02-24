@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Index, Mul, Sub};
 
 pub trait Dot {
     type Output;
@@ -12,26 +12,62 @@ pub trait Length {
     fn length(&self) -> Self::Output;
 }
 
+pub trait Normalize {
+    type Output;
+
+    fn normalize(&self) -> Self::Output;
+}
+
+pub trait Rotate {
+    fn rotate(&mut self, rotation_matrix: [[f64; 3]; 3]);
+}
+
 #[derive(PartialEq, Copy, Clone)]
 pub struct Point3D {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    p: [f64; 3],
 }
 
 impl Point3D {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Self { x, y, z }
+        Self { p: [x, y, z] }
     }
 
-    pub fn normalize(&self) -> Self {
+    pub const fn new_const(x: f64, y: f64, z: f64) -> Self {
+        Self { p: [x, y, z] }
+    }
+}
+
+impl Index<usize> for Point3D {
+    type Output = f64;
+
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.p[i]
+    }
+}
+
+impl Normalize for Point3D {
+    type Output = Self;
+
+    fn normalize(&self) -> Self::Output {
         let n = self.length();
 
-        Self {
-            x: self.x / n,
-            y: self.y / n,
-            z: self.z / n,
+        Self::Output {
+            p: [self[0] / n, self[1] / n, self[2] / n],
         }
+    }
+}
+
+impl Rotate for Point3D {
+    fn rotate(&mut self, rotation_matrix: [[f64; 3]; 3]) {
+        let mut rotated = [0.0; 3];
+
+        for i in 0..3 {
+            for j in 0..3 {
+                rotated[i] += rotation_matrix[i][j] * self[j];
+            }
+        }
+
+        self.p = rotated;
     }
 }
 
@@ -39,10 +75,8 @@ impl Add for Point3D {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Self {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
+        Self::Output {
+            p: [self[0] + rhs[0], self[1] + rhs[1], self[2] + rhs[2]],
         }
     }
 }
@@ -52,9 +86,7 @@ impl Mul<Point3D> for f64 {
 
     fn mul(self, rhs: Point3D) -> Self::Output {
         Self::Output {
-            x: self * rhs.x,
-            y: self * rhs.y,
-            z: self * rhs.z,
+            p: [self * rhs[0], self * rhs[1], self * rhs[2]],
         }
     }
 }
@@ -72,9 +104,7 @@ impl Sub for Point3D {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Self {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
+            p: [self[0] - rhs[0], self[1] - rhs[1], self[2] - rhs[2]],
         }
     }
 }
@@ -83,7 +113,7 @@ impl Dot for Point3D {
     type Output = f64;
 
     fn dot(&self, rhs: &Self) -> Self::Output {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+        self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
     }
 }
 

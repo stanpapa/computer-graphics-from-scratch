@@ -1,5 +1,5 @@
 use crate::color::Color;
-use crate::point3d::{Length, Point3D};
+use crate::point3d::{Length, Normalize, Point3D};
 
 #[derive(Clone, Copy)]
 pub struct Sphere {

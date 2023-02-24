@@ -26,7 +26,7 @@ impl Canvas {
         }
     }
 
-    pub fn to_viewport(&self, o: Point3D, x: isize, y: isize) -> Point3D {
+    pub fn to_viewport(&self, x: isize, y: isize) -> Point3D {
         // viewport dimensions
         let v_w = 1.0;
         let v_h = 1.0;
@@ -39,7 +39,7 @@ impl Canvas {
         let viewpoint = Point3D::new(v_x, v_y, v_z);
 
         // calculate vector from camera/origin to viewport
-        viewpoint - o
+        viewpoint
     }
 
     pub fn put_pixel(&mut self, x: isize, y: isize, color: Color) {
