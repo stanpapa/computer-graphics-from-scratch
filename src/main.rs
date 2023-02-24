@@ -111,21 +111,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn trace_ray(o: Point3D, d: Point3D, t_min: f64, t_max: f64) -> Color {
-    let mut t_closest = std::f64::INFINITY;
-    let mut sphere_closest = None;
-
-    for sphere in SCENE.iter() {
-        if let Some((t_1, t_2)) = intersect_ray_sphere(o, d, sphere) {
-            if t_1 < t_closest && t_1 > t_min && t_1 < t_max {
-                t_closest = t_1;
-                sphere_closest = Some(sphere);
-            }
-            if t_2 < t_closest && t_2 > t_min && t_2 < t_max {
-                t_closest = t_2;
-                sphere_closest = Some(sphere);
-            }
-        }
-    }
+    let (sphere_closest, t_closest) = closest_intersection(o, d, t_min, t_max);
 
     match sphere_closest {
         Some(sphere) => {
@@ -137,6 +123,26 @@ fn trace_ray(o: Point3D, d: Point3D, t_min: f64, t_max: f64) -> Color {
         }
         None => Color::default(),
     }
+}
+
+fn closest_intersection(o: Point3D, d: Point3D, t_min: f64, t_max: f64) -> (Option<Sphere>, f64) {
+    let mut t_closest = std::f64::INFINITY;
+    let mut sphere_closest = None;
+
+    for sphere in SCENE.iter() {
+        if let Some((t_1, t_2)) = intersect_ray_sphere(o, d, sphere) {
+            if t_1 < t_closest && t_1 > t_min && t_1 < t_max {
+                t_closest = t_1;
+                sphere_closest = Some(sphere.clone());
+            }
+            if t_2 < t_closest && t_2 > t_min && t_2 < t_max {
+                t_closest = t_2;
+                sphere_closest = Some(sphere.clone());
+            }
+        }
+    }
+
+    (sphere_closest, t_closest)
 }
 
 /// the ray equation
@@ -186,11 +192,17 @@ fn compute_lighting(point: Point3D, normal: Point3D, v: Point3D, s: i32) -> f64 
         match light.typ {
             LightType::Ambient => intensity += light.intensity,
             _ => {
-                let l = if light.typ == LightType::Point {
-                    light.point.unwrap() - point
+                let (l, t_max) = if light.typ == LightType::Point {
+                    (light.point.unwrap() - point, 1.0)
                 } else {
-                    light.point.unwrap()
+                    (light.point.unwrap(), std::f64::INFINITY)
                 };
+
+                // // shadow check
+                let (sphere_shadow, _) = closest_intersection(point, l, 0.001, t_max);
+                if sphere_shadow.is_some() {
+                    continue;
+                }
 
                 // diffuse
                 let dot_nl = normal.dot(&l);

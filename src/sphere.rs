@@ -1,6 +1,7 @@
 use crate::color::Color;
 use crate::point3d::{Length, Point3D};
 
+#[derive(Clone, Copy)]
 pub struct Sphere {
     pub center: Point3D, // center of sphere
     pub radius: f64,     // radius of sphere
