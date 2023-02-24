@@ -7,6 +7,7 @@ pub struct Sphere {
     pub radius: f64,     // radius of sphere
     pub color: Color,
     pub specular: i32, // shininess
+    pub reflective: f64,
 }
 
 // P is any point on the sphere surface

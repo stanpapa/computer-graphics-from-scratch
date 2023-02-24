@@ -52,6 +52,7 @@ const SCENE: [Sphere; 4] = [
         radius: 1.0,
         color: Color(255, 0, 0),
         specular: 500,
+        reflective: 0.2,
     },
     Sphere {
         center: Point3D {
@@ -62,6 +63,7 @@ const SCENE: [Sphere; 4] = [
         radius: 1.0,
         color: Color(0, 0, 255),
         specular: 500,
+        reflective: 0.3,
     },
     Sphere {
         center: Point3D {
@@ -72,6 +74,7 @@ const SCENE: [Sphere; 4] = [
         radius: 1.0,
         color: Color(0, 255, 0),
         specular: 10,
+        reflective: 0.4,
     },
     Sphere {
         center: Point3D {
@@ -82,6 +85,7 @@ const SCENE: [Sphere; 4] = [
         radius: 5000.0,
         color: Color(255, 255, 0),
         specular: 1000,
+        reflective: 0.5,
     },
 ];
 
@@ -95,7 +99,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let direction = canvas.to_viewport(camera, x, y);
 
             // color
-            let color = trace_ray(camera, direction, 1.0, 1000000.0);
+            let color = trace_ray(camera, direction, 1.0, std::f64::INFINITY, 3);
 
             canvas.put_pixel(x, y, color)
         }
@@ -110,18 +114,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn trace_ray(o: Point3D, d: Point3D, t_min: f64, t_max: f64) -> Color {
+fn trace_ray(o: Point3D, d: Point3D, t_min: f64, t_max: f64, recursion_depth: usize) -> Color {
     let (sphere_closest, t_closest) = closest_intersection(o, d, t_min, t_max);
 
     match sphere_closest {
         Some(sphere) => {
+            // compute local color
             let p = o + t_closest * d;
             let normal = sphere.normal(p);
+            let color_local = sphere.color * compute_lighting(p, normal, -1.0 * d, sphere.specular);
 
-            // sphere.color
-            sphere.color * compute_lighting(p, normal, -1.0 * d, sphere.specular)
+            // if we hit the recursion limit or the object is not reflective we're done
+            if recursion_depth <= 0 || sphere.reflective <= 0.0 {
+                return color_local;
+            }
+
+            // compute reflected color
+            let reflected = reflect_ray(-1.0 * d, normal);
+            let reflected_color =
+                trace_ray(p, reflected, 0.001, std::f64::INFINITY, recursion_depth - 1);
+
+            color_local * (1.0 - sphere.reflective) + reflected_color * sphere.reflective
         }
-        None => Color::default(),
+        None => Color::black(),
     }
 }
 
@@ -224,6 +239,10 @@ fn compute_lighting(point: Point3D, normal: Point3D, v: Point3D, s: i32) -> f64 
     }
 
     intensity
+}
+
+fn reflect_ray(reflected: Point3D, normal: Point3D) -> Point3D {
+    2.0 * normal * reflected.dot(&normal) - reflected
 }
 
 /// produce image of scene

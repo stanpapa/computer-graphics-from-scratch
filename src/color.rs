@@ -16,6 +16,12 @@ impl Default for Color {
     }
 }
 
+impl Color {
+    pub fn black() -> Color {
+        Self(0, 0, 0)
+    }
+}
+
 impl Add for Color {
     type Output = Self;
 
