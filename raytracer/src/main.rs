@@ -1,16 +1,14 @@
-mod canvas;
-mod color;
-mod light;
-mod point3d;
-mod sphere;
-
-use canvas::Canvas;
-use color::Color;
-use light::{Light, LightType};
-use point3d::{Dot, Length, Point3D, Rotate};
-use sphere::Sphere;
+use graphics::camera::Camera;
+use graphics::canvas::Canvas;
+use graphics::color::Color;
+use graphics::light::{Light, LightType};
+use graphics::point3d::{Dot, Length, Point3D, Rotate};
+use graphics::sphere::Sphere;
 
 use image::{codecs::png::PngEncoder, ColorType, ImageEncoder};
+
+extern crate rayon;
+use rayon::prelude::*;
 
 use std::fs::File;
 
@@ -63,30 +61,62 @@ const SCENE: [Sphere; 4] = [
         specular: 1000,
         reflective: 0.5,
     },
-    // Sphere {
-    //     center: Point3D::new_const(0.0, 1.5, 4.0),
-    //     radius: 0.5,
-    //     color: Color(0, 255, 255),
-    //     specular: 1000,
-    //     reflective: 0.1,
-    // },
 ];
 
 /// Conceptually, an "infinitesimaly small" real number.
 const EPS: f64 = 0.001;
 
-const CAMERA: Point3D = Point3D::new_const(3.0, 0.0, 1.0);
 // const CAMERA: Point3D = Point3D::new_const(0.0, 0.0, 0.0);
+// const ROTATION: [[f64; 3]; 3] = [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]];
 
+const CAMERA: Point3D = Point3D::new_const(3.0, 0.0, 1.0);
 const ROTATION: [[f64; 3]; 3] = [
     [0.7071, 0.0, -0.7071],
     [0.0, 1.0, 0.0],
     [0.7071, 0.0, 0.7071],
 ];
-// const ROTATION: [[f64; 3]; 3] = [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]];
+
+// fn ray_color(ray: &Ray) -> Color {
+//     let unit_directiony = ray.direction.normalize();
+//     let t = 0.5 * (unit_direction[1] + 1.0);
+//     (1.0 - t) * Color(1., 1., 1.) + t * Color(0.5, 0.7, 1.0);
+// }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // // image
+    // let aspect_ratio = 16.0 / 9.0;
+    // let image_width = 400;
+    // let image_height = (f64::from(image_width) / aspect_ratio) as i32;
+
+    // // camera
+    // let origin = Point3D::new(0.0, 0.0, 0.0);
+    // let viewport_height = 2.0;
+    // let viewport_width = aspect_ratio * viewport_height;
+    // let camera = Camera::new(origin, viewport_width, viewport_height, 1.0);
+    // let horizontal = Point3D::new(viewport_width, 0.0, 0.0);
+    // let vertical = Point3D::new(0.0, viewport_height, 0.0);
+    // let lower_left_corner =
+    //     origin - horizontal / 2.0 - vertical / 2.0 - Point3D::new(0.0, 0.0, focal_length);
+
+    // for j in image_height - 1..=0 {
+    //     for i in 0..image_width {
+    //         let u = f64::from(i) / (f64::from(image_width) - 1.0);
+    //         let v = f64::from(j) / (f64::from(image_height) - 1.0);
+    //         let ray = Ray::new(
+    //             origin,
+    //             lower_left_corner + u * horizontal + v * vertical - origin,
+    //         );
+
+    //         let color = ray_color(&ray);
+    //     }
+    // }
+
     let mut canvas = Canvas::new(600, 600);
+
+    // let x_iter: Vec<_> = ((-(canvas.width as isize) / 2)..(canvas.width as isize / 2)).collect();
+    // let y_iter: Vec<_> = ((-(canvas.height as isize) / 2)..(canvas.height as isize / 2)).collect();
+    // (x_iter, y_iter).par_iter_mut().for_each(|(x, y)| {
+
     for x in (-(canvas.width as isize) / 2)..(canvas.width as isize / 2) {
         for y in (-(canvas.height as isize) / 2)..(canvas.height as isize / 2) {
             // direction of ray
@@ -101,6 +131,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             canvas.put_pixel(x, y, color)
         }
     }
+
+    // let mut pixels = vec![0; canvas.width * canvas.height * 3];
+    // let rows: Vec<(usize, &mut [u8])> = pixels.chunks_mut(canvas.width * 3).enumerate().collect();
+    // rows.into_par_iter().for_each(|(row, band)| {
+    //     println!("{}:  {:?}", row, band);
+    // });
 
     write_image(
         "test.png",

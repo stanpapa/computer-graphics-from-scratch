@@ -1,4 +1,4 @@
-use std::ops::{Add, Index, Mul, Sub};
+use std::ops::{Add, Div, Index, Mul, Neg, Sub};
 
 pub trait Dot {
     type Output;
@@ -10,6 +10,7 @@ pub trait Length {
     type Output;
 
     fn length(&self) -> Self::Output;
+    fn length_squared(&self) -> Self::Output;
 }
 
 pub trait Normalize {
@@ -81,6 +82,16 @@ impl Add for Point3D {
     }
 }
 
+impl Div<f64> for Point3D {
+    type Output = Point3D;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Self::Output {
+            p: [self[0] / rhs, self[1] / rhs, self[2] / rhs],
+        }
+    }
+}
+
 impl Mul<Point3D> for f64 {
     type Output = Point3D;
 
@@ -96,6 +107,16 @@ impl Mul<f64> for Point3D {
 
     fn mul(self, rhs: f64) -> Self::Output {
         rhs * self
+    }
+}
+
+impl Neg for Point3D {
+    type Output = Point3D;
+
+    fn neg(self) -> Self::Output {
+        Self::Output {
+            p: [-self.p[0], -self.p[1], -self.p[2]],
+        }
     }
 }
 
@@ -122,5 +143,9 @@ impl Length for Point3D {
 
     fn length(&self) -> Self::Output {
         self.dot(self).sqrt()
+    }
+
+    fn length_squared(&self) -> Self::Output {
+        self.dot(self)
     }
 }
