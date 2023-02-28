@@ -1,9 +1,10 @@
-use crate::{point3d::Point3D, ray::Ray};
+use crate::{material::Material, point3d::Point3D, ray::Ray};
 
 pub struct HitRecord {
     pub point: Point3D,
     pub normal: Point3D,
     pub t: f64,
+    pub material: Material,
     pub front_face: bool,
 }
 

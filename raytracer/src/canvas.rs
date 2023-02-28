@@ -15,7 +15,7 @@ impl Canvas {
         let mut pixels = HashMap::new();
         for x in 0..width as isize {
             for y in 0..height as isize {
-                pixels.insert((x, y), Color::default());
+                pixels.insert((x, y), Color::white());
             }
         }
 

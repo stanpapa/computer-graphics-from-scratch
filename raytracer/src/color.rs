@@ -1,7 +1,4 @@
-use std::{
-    default::Default,
-    ops::{Add, AddAssign, Div, Mul, Sub},
-};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
 /// RGB support only
 ///
@@ -22,13 +19,11 @@ fn clamp(value: f32) -> f32 {
     value
 }
 
-impl Default for Color {
-    fn default() -> Self {
+impl Color {
+    pub fn white() -> Self {
         Self(255., 255., 255.)
     }
-}
 
-impl Color {
     pub fn black() -> Color {
         Self(0., 0., 0.)
     }
@@ -78,13 +73,13 @@ impl Div<f32> for Color {
     }
 }
 
-// impl Mul<u8> for Color {
-//     type Output = Self;
+impl Mul<Color> for Color {
+    type Output = Self;
 
-//     fn mul(self, rhs: u8) -> Self::Output {
-//         Self(self.0 * rhs, self.1 * rhs, self.2 * rhs)
-//     }
-// }
+    fn mul(self, rhs: Color) -> Self::Output {
+        Self(self.0 * rhs.0, self.1 * rhs.1, self.2 * rhs.2)
+    }
+}
 
 impl Mul<f32> for Color {
     type Output = Self;

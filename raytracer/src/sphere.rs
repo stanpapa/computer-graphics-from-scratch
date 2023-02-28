@@ -1,6 +1,7 @@
 use crate::{
     color::Color,
     hittable::{HitRecord, Hittable},
+    material::Material,
     point3d::{Dot, Length, Normalize, Point3D},
     ray::Ray,
 };
@@ -9,6 +10,9 @@ use crate::{
 pub struct Sphere {
     pub center: Point3D, // center of sphere
     pub radius: f64,     // radius of sphere
+
+    pub material: Material,
+
     pub color: Color,
     pub specular: i32, // shininess
     pub reflective: f64,
@@ -74,6 +78,7 @@ impl Hittable for Sphere {
             normal: if front_face { normal } else { -normal },
             t: root,
             front_face,
+            material: self.material,
         })
     }
 }

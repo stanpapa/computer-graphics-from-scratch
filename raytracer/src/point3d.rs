@@ -57,6 +57,12 @@ impl Point3D {
             }
         }
     }
+
+    /// return true if the vector is near 0 in all dimensions
+    pub fn near_zero(&self) -> bool {
+        let threshold = 1e-8;
+        self[0].abs() < threshold && self[1].abs() < threshold && self[2].abs() < threshold
+    }
 }
 
 impl Index<usize> for Point3D {
