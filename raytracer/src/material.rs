@@ -43,7 +43,7 @@ impl Lambertian {
 
 impl Scatterable for Lambertian {
     fn scatter(&self, _ray_in: &Ray, hit_record: &HitRecord) -> Option<(Ray, Color)> {
-        let mut scatter_direction = hit_record.normal + Point3D::random_unit();
+        let mut scatter_direction = hit_record.normal + Point3D::random_in_unit_sphere();
 
         // catch degenerate scatter direction
         if scatter_direction.near_zero() {
@@ -80,7 +80,7 @@ impl Scatterable for Metal {
         let reflected = reflect(ray_in.direction.normalize(), hit_record.normal);
         let scattered = Ray::new(
             hit_record.point,
-            reflected + self.fuzz * Point3D::random_unit(),
+            reflected + self.fuzz * Point3D::random_in_unit_sphere(),
         );
         let attenuation = self.albedo;
 

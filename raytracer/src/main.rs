@@ -5,7 +5,7 @@ use graphics::{
     hittable::{HitRecord, Hittable},
     // light::{Light, LightType},
     material::{Dielectric, Lambertian, Material, Metal, Scatterable},
-    point3d::{Normalize, Point3D},
+    point3d::{Length, Normalize, Point3D},
     ray::Ray,
     sphere::Sphere,
 };
@@ -144,12 +144,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let depth_max = 50;
 
     // camera
+    let look_from = Point3D::new(3., 3., 2.);
+    let look_at = Point3D::new(0., 0., -1.);
     let camera = Camera::new(
-        Point3D::new(-2., 2., 1.),
-        Point3D::new(0., 0., -1.),
+        look_from,
+        look_at,
         Point3D::new(0., 1., 0.),
         20.,
         aspect_ratio,
+        2.0,
+        (look_from - look_at).length(),
     );
     let samples_per_pixel = 100;
 

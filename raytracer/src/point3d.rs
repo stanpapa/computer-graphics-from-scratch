@@ -55,9 +55,20 @@ impl Point3D {
         )
     }
 
-    pub fn random_unit() -> Self {
+    pub fn random_in_unit_sphere() -> Self {
         loop {
             let p = Point3D::random(-1., 1.);
+            if p.length_squared() < 1. {
+                return p;
+            }
+        }
+    }
+
+    pub fn random_in_unit_disk() -> Self {
+        let mut rng = rand::thread_rng();
+
+        loop {
+            let p = Point3D::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.);
             if p.length_squared() < 1. {
                 return p;
             }
