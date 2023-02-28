@@ -67,9 +67,9 @@ impl Canvas {
             for x in 0..self.width as isize {
                 match self.pixels.get(&(x, y)) {
                     Some(p) => {
-                        pixels[3 * count] = p.0;
-                        pixels[3 * count + 1] = p.1;
-                        pixels[3 * count + 2] = p.2;
+                        pixels[3 * count] = p.0 as u8;
+                        pixels[3 * count + 1] = p.1 as u8;
+                        pixels[3 * count + 2] = p.2 as u8;
                     }
                     None => (),
                 }

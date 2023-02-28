@@ -1,24 +1,46 @@
 use std::{
     default::Default,
-    ops::{Add, Mul, Sub},
+    ops::{Add, AddAssign, Div, Mul, Sub},
 };
 
 /// RGB support only
 ///
 /// clamping to the [0-255] range
 /// any value over 255 is 255, and any value below 0 is 0
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct Color(pub u8, pub u8, pub u8);
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Color(pub f32, pub f32, pub f32);
+
+fn clamp(value: f32) -> f32 {
+    // if value > 255. {
+    //     return 255.;
+    if value > 1. {
+        return 1.;
+    } else if value < 0. {
+        return 0.;
+    }
+
+    value
+}
 
 impl Default for Color {
     fn default() -> Self {
-        Self(255, 255, 255)
+        Self(255., 255., 255.)
     }
 }
 
 impl Color {
     pub fn black() -> Color {
-        Self(0, 0, 0)
+        Self(0., 0., 0.)
+    }
+
+    pub fn to_u8(self, samples: usize) -> [u8; 3] {
+        let scaled = self / samples as f32;
+
+        [
+            (clamp(scaled.0) * 255.) as u8,
+            (clamp(scaled.1) * 255.) as u8,
+            (clamp(scaled.2) * 255.) as u8,
+        ]
     }
 }
 
@@ -26,49 +48,30 @@ impl Add for Color {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        let r = (u16::from(self.0) + u16::from(rhs.0))
-            .max(u16::from(std::u8::MIN))
-            .min(u16::from(std::u8::MAX)) as u8;
-        let g = (u16::from(self.1) + u16::from(rhs.1))
-            .max(u16::from(std::u8::MIN))
-            .min(u16::from(std::u8::MAX)) as u8;
-        let b = (u16::from(self.2) + u16::from(rhs.2))
-            .max(u16::from(std::u8::MIN))
-            .min(u16::from(std::u8::MAX)) as u8;
-
-        Self(r, g, b)
+        // Self(
+        //     clamp(self.0 + rhs.0),
+        //     clamp(self.1 + rhs.1),
+        //     clamp(self.2 + rhs.2),
+        // )
+        Self(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
     }
 }
 
-// impl AddAssign for Color {
-//     fn add_assign(&mut self, rhs: Self) {
-//         *self = Self(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2);
-//     }
-// }
+impl AddAssign for Color {
+    fn add_assign(&mut self, rhs: Self) {
+        self.0 += rhs.0;
+        self.1 += rhs.1;
+        self.2 += rhs.2;
+    }
+}
 
-impl Sub for Color {
+impl Div<f32> for Color {
     type Output = Self;
 
-    fn sub(self, rhs: Self) -> Self::Output {
-        let r = (i16::from(self.0) - i16::from(rhs.0))
-            .max(i16::from(std::u8::MIN))
-            .min(i16::from(std::u8::MAX)) as u8;
-        let g = (i16::from(self.1) - i16::from(rhs.1))
-            .max(i16::from(std::u8::MIN))
-            .min(i16::from(std::u8::MAX)) as u8;
-        let b = (i16::from(self.2) - i16::from(rhs.2))
-            .max(i16::from(std::u8::MIN))
-            .min(i16::from(std::u8::MAX)) as u8;
-
-        Self(r, g, b)
+    fn div(self, rhs: f32) -> Self::Output {
+        Self(self.0 / rhs, self.1 / rhs, self.2 / rhs)
     }
 }
-
-// impl SubAssign for Color {
-//     fn sub_assign(&mut self, rhs: Self) {
-//         *self = Self(self.0 - rhs.0, self.1 - rhs.1, self.2 - rhs.2);
-//     }
-// }
 
 // impl Mul<u8> for Color {
 //     type Output = Self;
@@ -78,34 +81,40 @@ impl Sub for Color {
 //     }
 // }
 
-impl Mul<f64> for Color {
+impl Mul<f32> for Color {
     type Output = Self;
 
-    fn mul(self, rhs: f64) -> Self::Output {
-        let r = (f64::from(self.0) * rhs)
-            .max(f64::from(std::u8::MIN))
-            .min(f64::from(std::u8::MAX))
-            .round() as u8;
-        let g = (f64::from(self.1) * rhs)
-            .max(f64::from(std::u8::MIN))
-            .min(f64::from(std::u8::MAX))
-            .round() as u8;
-        let b = (f64::from(self.2) * rhs)
-            .max(f64::from(std::u8::MIN))
-            .min(f64::from(std::u8::MAX))
-            .round() as u8;
-
-        Self(r, g, b)
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self(self.0 * rhs, self.1 * rhs, self.2 * rhs)
     }
 }
 
-impl Mul<Color> for f64 {
+impl Mul<Color> for f32 {
     type Output = Color;
 
     fn mul(self, rhs: Color) -> Self::Output {
         rhs * self
     }
 }
+
+impl Sub for Color {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        // Self(
+        //     clamp(self.0 - rhs.0),
+        //     clamp(self.1 - rhs.1),
+        //     clamp(self.2 - rhs.2),
+        // )
+        Self(self.0 - rhs.0, self.1 - rhs.1, self.2 - rhs.2)
+    }
+}
+
+// impl SubAssign for Color {
+//     fn sub_assign(&mut self, rhs: Self) {
+//         *self = Self(self.0 - rhs.0, self.1 - rhs.1, self.2 - rhs.2);
+//     }
+// }
 
 // impl MulAssign<u8> for Color {
 //     fn mul_assign(&mut self, rhs: u8) {
@@ -125,24 +134,24 @@ mod tests {
 
     #[test]
     fn add() {
-        let c1 = Color(0, 0, 255);
-        let c2 = Color(10, 10, 10);
+        let c1 = Color(0., 0., 255.);
+        let c2 = Color(10., 10., 10.);
 
-        assert_eq!(c1 + c2, Color(10, 10, 255));
+        assert_eq!((c1 + c2).to_u8(1), [10, 10, 255]);
     }
 
     #[test]
     fn sub() {
-        let c1 = Color(100, 100, 255);
-        let c2 = Color(150, 10, 30);
+        let c1 = Color(100., 100., 255.);
+        let c2 = Color(150., 10., 30.);
 
-        assert_eq!(c1 - c2, Color(0, 90, 225));
+        assert_eq!((c1 - c2).to_u8(1), [0, 90, 225]);
     }
 
     #[test]
     fn mul() {
-        let c = Color(11, 19, 234);
+        let c = Color(11., 19., 234.);
 
-        assert_eq!(1.3 * c, Color(14, 25, 255));
+        assert_eq!((1.3 * c).to_u8(1), [14, 25, 255]);
     }
 }

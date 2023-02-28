@@ -48,13 +48,14 @@ impl Hittable for Sphere {
         let c = oc.length_squared() - self.radius * self.radius;
 
         let discriminant = b_half * b_half - a * c;
+
+        // no intersection
         if discriminant < 0.0 {
             return None;
         }
 
-        let d_sqrt = discriminant.sqrt();
-
         // find the neaest root that lies in the acceptable range
+        let d_sqrt = discriminant.sqrt();
         let mut root = (-b_half - d_sqrt) / a;
         if root < t_min || root > t_max {
             root = (-b_half + d_sqrt) / a;
