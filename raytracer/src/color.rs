@@ -21,7 +21,7 @@ fn clamp(value: f32) -> f32 {
 
 impl Color {
     pub fn white() -> Self {
-        Self(255., 255., 255.)
+        Self(1., 1., 1.)
     }
 
     pub fn black() -> Color {

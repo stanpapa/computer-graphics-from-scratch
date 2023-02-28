@@ -4,8 +4,8 @@ use graphics::{
     color::Color,
     hittable::{HitRecord, Hittable},
     // light::{Light, LightType},
-    material::{Lambertian, Material, Metal, Scatterable},
-    point3d::{Dot, Normalize, Point3D},
+    material::{Dielectric, Lambertian, Material, Metal, Scatterable},
+    point3d::{Normalize, Point3D},
     ray::Ray,
     sphere::Sphere,
 };
@@ -68,7 +68,7 @@ use std::fs::File;
 //         reflective: 0.5,
 //     },
 // ];
-const SCENE: [Sphere; 4] = [
+const SCENE: [Sphere; 5] = [
     Sphere {
         center: Point3D::new_const(0.0, -100.5, -1.0),
         radius: 100.0,
@@ -83,8 +83,9 @@ const SCENE: [Sphere; 4] = [
         center: Point3D::new_const(0.0, 0.0, -1.0),
         radius: 0.5,
         material: Material::Lambertian(Lambertian {
-            albedo: Color(0.7, 0.3, 0.3),
+            albedo: Color(0.1, 0.2, 0.5),
         }),
+
         color: Color(255., 0., 0.),
         specular: 500,
         reflective: 0.2,
@@ -92,9 +93,18 @@ const SCENE: [Sphere; 4] = [
     Sphere {
         center: Point3D::new_const(-1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Material::Metal(Metal {
-            albedo: Color(0.8, 0.8, 0.8),
-            fuzz: 0.3,
+        material: Material::Dielectric(Dielectric {
+            refraction_index: 1.5,
+        }),
+        color: Color(255., 0., 0.),
+        specular: 500,
+        reflective: 0.2,
+    },
+    Sphere {
+        center: Point3D::new_const(-1.0, 0.0, -1.0),
+        radius: -0.4,
+        material: Material::Dielectric(Dielectric {
+            refraction_index: 1.5,
         }),
         color: Color(255., 0., 0.),
         specular: 500,
@@ -105,7 +115,7 @@ const SCENE: [Sphere; 4] = [
         radius: 0.5,
         material: Material::Metal(Metal {
             albedo: Color(0.8, 0.6, 0.2),
-            fuzz: 1.,
+            fuzz: 0.,
         }),
         color: Color(255., 0., 0.),
         specular: 500,
