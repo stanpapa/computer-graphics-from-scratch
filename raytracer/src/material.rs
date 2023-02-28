@@ -1,11 +1,11 @@
-use rand::Rng;
-
 use crate::{
     color::Color,
     hittable::HitRecord,
     point3d::{DotProduct, Length, Normalize, Point3D},
     ray::Ray,
 };
+
+use rand::Rng;
 
 #[derive(Clone, Copy)]
 pub enum Material {

@@ -12,7 +12,7 @@ pub struct Camera {
     // orthonormal basis vectors
     u: Point3D,
     v: Point3D,
-    w: Point3D,
+    // w: Point3D,
     lens_radius: f64,
 }
 
@@ -51,7 +51,7 @@ impl Camera {
             vertical,
             u,
             v,
-            w,
+            // w,
             lens_radius: aperture / 2.,
         }
     }
