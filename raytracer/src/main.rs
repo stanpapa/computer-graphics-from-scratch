@@ -94,6 +94,7 @@ const SCENE: [Sphere; 4] = [
         radius: 0.5,
         material: Material::Metal(Metal {
             albedo: Color(0.8, 0.8, 0.8),
+            fuzz: 0.3,
         }),
         color: Color(255., 0., 0.),
         specular: 500,
@@ -104,6 +105,7 @@ const SCENE: [Sphere; 4] = [
         radius: 0.5,
         material: Material::Metal(Metal {
             albedo: Color(0.8, 0.6, 0.2),
+            fuzz: 1.,
         }),
         color: Color(255., 0., 0.),
         specular: 500,
@@ -220,7 +222,7 @@ fn ray_color(ray: &Ray, depth: isize) -> Color {
             return attenuation * ray_color(&scattered, depth - 1);
         }
 
-        return Color::white();
+        return Color::black();
     }
 
     let unit_direction = ray.direction.normalize();
