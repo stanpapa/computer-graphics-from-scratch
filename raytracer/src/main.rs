@@ -144,7 +144,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let depth_max = 50;
 
     // camera
-    let camera = Camera::default();
+    let camera = Camera::new(
+        Point3D::new(-2., 2., 1.),
+        Point3D::new(0., 0., -1.),
+        Point3D::new(0., 1., 0.),
+        20.,
+        aspect_ratio,
+    );
     let samples_per_pixel = 100;
 
     let mut pixels = vec![0; image_width * image_height * 3];

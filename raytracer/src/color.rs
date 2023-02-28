@@ -20,11 +20,11 @@ fn clamp(value: f32) -> f32 {
 }
 
 impl Color {
-    pub fn white() -> Self {
+    pub const fn white() -> Self {
         Self(1., 1., 1.)
     }
 
-    pub fn black() -> Color {
+    pub const fn black() -> Color {
         Self(0., 0., 0.)
     }
 

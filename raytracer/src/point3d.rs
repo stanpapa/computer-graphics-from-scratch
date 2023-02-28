@@ -2,10 +2,16 @@ use std::ops::{Add, Div, Index, Mul, Neg, Sub};
 
 use rand::Rng;
 
-pub trait Dot {
+pub trait DotProduct {
     type Output;
 
     fn dot(&self, rhs: &Self) -> Self::Output;
+}
+
+pub trait CrossProduct {
+    type Output;
+
+    fn cross(&self, rhs: &Self) -> Self::Output;
 }
 
 pub trait Length {
@@ -157,11 +163,25 @@ impl Sub for Point3D {
     }
 }
 
-impl Dot for Point3D {
+impl DotProduct for Point3D {
     type Output = f64;
 
     fn dot(&self, rhs: &Self) -> Self::Output {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
+    }
+}
+
+impl CrossProduct for Point3D {
+    type Output = Self;
+
+    fn cross(&self, rhs: &Self) -> Self::Output {
+        Self::Output {
+            p: [
+                self[1] * rhs[2] - self[2] * rhs[1],
+                self[2] * rhs[0] - self[0] * rhs[2],
+                self[0] * rhs[1] - self[1] * rhs[0],
+            ],
+        }
     }
 }
 

@@ -1,4 +1,7 @@
-use crate::{point3d::Point3D, ray::Ray};
+use crate::{
+    point3d::{CrossProduct, Normalize, Point3D},
+    ray::Ray,
+};
 
 use std::default::Default;
 
@@ -34,25 +37,44 @@ impl Default for Camera {
     }
 }
 
-impl Camera {
-    //     pub fn new(
-    //         origin: Point3D,
-    //         viewport_height: f64,
-    //         viewport_width: f64,
-    //         focal_length: f64,
-    //     ) -> Self {
-    //         Self {
-    //             origin,
-    //             viewport_height,
-    //             viewport_width,
-    //             focal_length,
-    //         }
-    //     }
+fn degrees_to_radians(vfov: f64) -> f64 {
+    vfov * std::f64::consts::PI / 180.
+}
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+impl Camera {
+    pub fn new(
+        look_from: Point3D,
+        look_at: Point3D,
+        vup: Point3D, // view up
+        vfov: f64,    //vertical field-of-view in degrees
+        aspect_ratio: f64,
+    ) -> Self {
+        let theta = degrees_to_radians(vfov);
+        let h = (theta / 2.).tan();
+        let viewport_height = 2. * h;
+        let viewport_width = aspect_ratio * viewport_height;
+
+        // construct orthonormal basis
+        let w = (look_from - look_at).normalize();
+        let u = vup.cross(&w).normalize();
+        let v = w.cross(&u);
+
+        let horizontal = viewport_width * u;
+        let vertical = viewport_height * v;
+        let lower_left_corner = look_from - horizontal / 2. - vertical / 2. - w;
+
+        Self {
+            origin: look_from,
+            lower_left_corner,
+            horizontal,
+            vertical,
+        }
+    }
+
+    pub fn get_ray(&self, s: f64, t: f64) -> Ray {
         Ray::new(
             self.origin,
-            self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
+            self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin,
         )
     }
 }

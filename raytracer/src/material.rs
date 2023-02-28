@@ -3,7 +3,7 @@ use rand::Rng;
 use crate::{
     color::Color,
     hittable::HitRecord,
-    point3d::{Dot, Length, Normalize, Point3D},
+    point3d::{DotProduct, Length, Normalize, Point3D},
     ray::Ray,
 };
 
