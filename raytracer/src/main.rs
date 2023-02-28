@@ -75,9 +75,9 @@ const SCENE: [Sphere; 5] = [
         material: Material::Lambertian(Lambertian {
             albedo: Color(0.8, 0.8, 0.0),
         }),
-        color: Color(0., 0., 255.),
-        specular: 500,
-        reflective: 0.3,
+        // color: Color(0., 0., 255.),
+        // specular: 500,
+        // reflective: 0.3,
     },
     Sphere {
         center: Point3D::new_const(0.0, 0.0, -1.0),
@@ -85,10 +85,9 @@ const SCENE: [Sphere; 5] = [
         material: Material::Lambertian(Lambertian {
             albedo: Color(0.1, 0.2, 0.5),
         }),
-
-        color: Color(255., 0., 0.),
-        specular: 500,
-        reflective: 0.2,
+        // color: Color(255., 0., 0.),
+        // specular: 500,
+        // reflective: 0.2,
     },
     Sphere {
         center: Point3D::new_const(-1.0, 0.0, -1.0),
@@ -96,9 +95,9 @@ const SCENE: [Sphere; 5] = [
         material: Material::Dielectric(Dielectric {
             refraction_index: 1.5,
         }),
-        color: Color(255., 0., 0.),
-        specular: 500,
-        reflective: 0.2,
+        // color: Color(255., 0., 0.),
+        // specular: 500,
+        // reflective: 0.2,
     },
     Sphere {
         center: Point3D::new_const(-1.0, 0.0, -1.0),
@@ -106,9 +105,9 @@ const SCENE: [Sphere; 5] = [
         material: Material::Dielectric(Dielectric {
             refraction_index: 1.5,
         }),
-        color: Color(255., 0., 0.),
-        specular: 500,
-        reflective: 0.2,
+        // color: Color(255., 0., 0.),
+        // specular: 500,
+        // reflective: 0.2,
     },
     Sphere {
         center: Point3D::new_const(1.0, 0.0, -1.0),
@@ -117,45 +116,35 @@ const SCENE: [Sphere; 5] = [
             albedo: Color(0.8, 0.6, 0.2),
             fuzz: 0.,
         }),
-        color: Color(255., 0., 0.),
-        specular: 500,
-        reflective: 0.2,
+        // color: Color(255., 0., 0.),
+        // specular: 500,
+        // reflective: 0.2,
     },
 ];
 
 /// Conceptually, an "infinitesimaly small" real number.
 const EPSILON: f64 = 0.001;
 
-// const CAMERA: Point3D = Point3D::new_const(0.0, 0.0, 0.0);
-// const ROTATION: [[f64; 3]; 3] = [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]];
-
-const CAMERA: Point3D = Point3D::new_const(3.0, 0.0, 1.0);
-const ROTATION: [[f64; 3]; 3] = [
-    [0.7071, 0.0, -0.7071],
-    [0.0, 1.0, 0.0],
-    [0.7071, 0.0, 0.7071],
-];
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // image
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width: usize = 400;
+    let aspect_ratio = 3. / 2.;
+    let image_width: usize = 1200;
     let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+    let samples_per_pixel = 500;
     let depth_max = 50;
 
     // camera
-    let look_from = Point3D::new(3., 3., 2.);
-    let look_at = Point3D::new(0., 0., -1.);
+    let look_from = Point3D::new(13., 2., 3.);
+    let look_at = Point3D::new(0., 0., 0.);
     let camera = Camera::new(
         look_from,
         look_at,
         Point3D::new(0., 1., 0.),
         20.,
         aspect_ratio,
-        2.0,
-        (look_from - look_at).length(),
+        0.1,
+        10.,
     );
-    let samples_per_pixel = 100;
 
     let mut pixels = vec![0; image_width * image_height * 3];
     // let cols: Vec<(usize, &mut [u8])> = pixels
@@ -192,7 +181,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let ray = camera.get_ray(u, v);
 
-                color += ray_color(&ray, depth_max);
+                color += ray_color(&ray, &random_scene(), depth_max);
                 // println!("{:?}", color);
             }
 
@@ -232,14 +221,82 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn ray_color(ray: &Ray, depth: isize) -> Color {
+fn random_scene() -> Vec<Sphere> {
+    let mut scene = vec![
+        Sphere {
+            // ground
+            center: Point3D::new(0., -1000., -1.),
+            radius: 1000.,
+            material: Material::Lambertian(Lambertian::new(Color(0.5, 0.5, 0.5))),
+        },
+        Sphere {
+            center: Point3D::new(0., 1., 0.),
+            radius: 1.,
+            material: Material::Dielectric(Dielectric::new(1.5)),
+        },
+        Sphere {
+            center: Point3D::new(-4., 1., 0.),
+            radius: 1.,
+            material: Material::Lambertian(Lambertian::new(Color(0.4, 0.2, 0.1))),
+        },
+        Sphere {
+            center: Point3D::new(4., 1., 0.),
+            radius: 1.,
+            material: Material::Metal(Metal::new(Color(0.7, 0.6, 0.5), 0.)),
+        },
+    ];
+
+    let mut rng = rand::thread_rng();
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_material = rng.gen::<f64>();
+            let center = Point3D::new(
+                f64::from(a) + 0.9 * rng.gen::<f64>(),
+                0.2,
+                f64::from(b) + 0.9 * rng.gen::<f64>(),
+            );
+
+            if (center - Point3D::new(4., 0.2, 0.)).length() > 0.9 {
+                if choose_material < 0.8 {
+                    let albedo = Color::random() * Color::random();
+                    // diffuse
+                    scene.push(Sphere::new(
+                        center,
+                        0.2,
+                        Material::Lambertian(Lambertian::new(albedo)),
+                    ));
+                } else if choose_material < 0.95 {
+                    // metal
+                    let albedo = Color::random_range(0.5, 1.);
+                    let fuzz = rng.gen_range(0.0..0.5);
+                    scene.push(Sphere::new(
+                        center,
+                        0.2,
+                        Material::Metal(Metal::new(albedo, fuzz)),
+                    ));
+                } else {
+                    // glass
+                    scene.push(Sphere::new(
+                        center,
+                        0.2,
+                        Material::Dielectric(Dielectric::new(1.5)),
+                    ));
+                }
+            }
+        }
+    }
+
+    scene
+}
+
+fn ray_color(ray: &Ray, scene: &[Sphere], depth: isize) -> Color {
     if depth <= 0 {
         return Color::black();
     }
 
-    if let Some(hit_record) = hit_world(&SCENE, ray, EPSILON, f64::INFINITY) {
+    if let Some(hit_record) = hit_world(&scene, ray, EPSILON, f64::INFINITY) {
         if let Some((scattered, attenuation)) = hit_record.material.scatter(ray, &hit_record) {
-            return attenuation * ray_color(&scattered, depth - 1);
+            return attenuation * ray_color(&scattered, scene, depth - 1);
         }
 
         return Color::black();

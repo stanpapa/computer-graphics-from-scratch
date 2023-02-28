@@ -1,5 +1,7 @@
 use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
+use rand::Rng;
+
 /// RGB support only
 ///
 /// clamping to the [0-255] range
@@ -24,8 +26,22 @@ impl Color {
         Self(1., 1., 1.)
     }
 
-    pub const fn black() -> Color {
+    pub const fn black() -> Self {
         Self(0., 0., 0.)
+    }
+
+    pub fn random() -> Self {
+        let mut rng = rand::thread_rng();
+        Self(rng.gen(), rng.gen(), rng.gen())
+    }
+
+    pub fn random_range(min: f32, max: f32) -> Self {
+        let mut rng = rand::thread_rng();
+        Self(
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+        )
     }
 
     fn sqrt(&self) -> Self {

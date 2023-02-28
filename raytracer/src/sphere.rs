@@ -1,5 +1,4 @@
 use crate::{
-    color::Color,
     hittable::{HitRecord, Hittable},
     material::Material,
     point3d::{DotProduct, Length, Normalize, Point3D},
@@ -10,12 +9,7 @@ use crate::{
 pub struct Sphere {
     pub center: Point3D, // center of sphere
     pub radius: f64,     // radius of sphere
-
     pub material: Material,
-
-    pub color: Color,
-    pub specular: i32, // shininess
-    pub reflective: f64,
 }
 
 // P is any point on the sphere surface
@@ -23,13 +17,13 @@ pub struct Sphere {
 // | P - C | = r
 
 impl Sphere {
-    // pub fn new(center: Point3D, radius: f64, color: Color) -> Self {
-    //     Self {
-    //         center,
-    //         radius,
-    //         color,
-    //     }
-    // }
+    pub fn new(center: Point3D, radius: f64, material: Material) -> Self {
+        Self {
+            center,
+            radius,
+            material,
+        }
+    }
 
     pub fn normal(&self, p: Point3D) -> Point3D {
         let normal = p - self.center;

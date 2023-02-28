@@ -97,6 +97,12 @@ pub struct Dielectric {
     pub refraction_index: f64,
 }
 
+impl Dielectric {
+    pub fn new(refraction_index: f64) -> Self {
+        Self { refraction_index }
+    }
+}
+
 fn refract(uv: Point3D, normal: Point3D, eta_over_eta_prime: f64) -> Point3D {
     let cos_theta = (-uv).dot(&normal).min(1.0);
     let r_out_perpendicular = eta_over_eta_prime * (uv + cos_theta * normal);
