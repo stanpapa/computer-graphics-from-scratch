@@ -1,5 +1,7 @@
 use std::ops::{Add, Div, Index, Mul, Neg, Sub};
 
+use rand::Rng;
+
 pub trait Dot {
     type Output;
 
@@ -35,6 +37,25 @@ impl Point3D {
 
     pub const fn new_const(x: f64, y: f64, z: f64) -> Self {
         Self { p: [x, y, z] }
+    }
+
+    fn random(min: f64, max: f64) -> Self {
+        let mut rng = rand::thread_rng();
+
+        Point3D::new(
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+        )
+    }
+
+    pub fn random_unit() -> Self {
+        loop {
+            let p = Point3D::random(-1., 1.);
+            if p.length_squared() < 1. {
+                return p;
+            }
+        }
     }
 }
 

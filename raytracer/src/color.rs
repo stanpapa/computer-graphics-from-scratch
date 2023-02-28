@@ -33,8 +33,13 @@ impl Color {
         Self(0., 0., 0.)
     }
 
-    pub fn to_u8(self, samples: usize) -> [u8; 3] {
-        let scaled = self / samples as f32;
+    fn sqrt(&self) -> Self {
+        Self(self.0.sqrt(), self.1.sqrt(), self.2.sqrt())
+    }
+
+    pub fn to_bytes(self, samples: usize) -> [u8; 3] {
+        // sqrt is for gamma correction (= 2)
+        let scaled = (self / samples as f32).sqrt();
 
         [
             (clamp(scaled.0) * 255.) as u8,
@@ -137,7 +142,7 @@ mod tests {
         let c1 = Color(0., 0., 255.);
         let c2 = Color(10., 10., 10.);
 
-        assert_eq!((c1 + c2).to_u8(1), [10, 10, 255]);
+        assert_eq!((c1 + c2).to_bytes(1), [10, 10, 255]);
     }
 
     #[test]
@@ -145,13 +150,13 @@ mod tests {
         let c1 = Color(100., 100., 255.);
         let c2 = Color(150., 10., 30.);
 
-        assert_eq!((c1 - c2).to_u8(1), [0, 90, 225]);
+        assert_eq!((c1 - c2).to_bytes(1), [0, 90, 225]);
     }
 
     #[test]
     fn mul() {
         let c = Color(11., 19., 234.);
 
-        assert_eq!((1.3 * c).to_u8(1), [14, 25, 255]);
+        assert_eq!((1.3 * c).to_bytes(1), [14, 25, 255]);
     }
 }

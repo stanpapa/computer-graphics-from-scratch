@@ -103,6 +103,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let aspect_ratio = 16.0 / 9.0;
     let image_width: usize = 400;
     let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+    let depth_max = 50;
 
     // camera
     let camera = Camera::default();
@@ -130,6 +131,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //     }
     // });
 
+    // render
     let mut count = 0;
     let mut rng = rand::thread_rng();
     for j in (0..(image_height - 1)).rev() {
@@ -142,11 +144,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let ray = camera.get_ray(u, v);
 
-                color += ray_color(&ray);
+                color += ray_color(&ray, depth_max);
                 // println!("{:?}", color);
             }
 
-            let bytes = color.to_u8(samples_per_pixel);
+            let bytes = color.to_bytes(samples_per_pixel);
 
             pixels[3 * count] = bytes[0];
             pixels[3 * count + 1] = bytes[1];
@@ -182,13 +184,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn ray_color(ray: &Ray) -> Color {
+fn ray_color(ray: &Ray, depth: isize) -> Color {
+    if depth <= 0 {
+        return Color::black();
+    }
+
     if let Some(hit_record) = hit_world(&SCENE, ray, EPSILON, f64::INFINITY) {
+        let random_unit = Point3D::random_unit();
+        let target = if random_unit.dot(&hit_record.normal) > 0. {
+            // in the same hemisphere as normal
+            hit_record.point + random_unit
+        } else {
+            hit_record.point - random_unit
+        };
+
         return 0.5
-            * Color(
-                1. + hit_record.normal[0] as f32,
-                1. + hit_record.normal[1] as f32,
-                1. + hit_record.normal[2] as f32,
+            * ray_color(
+                &Ray::new(hit_record.point, target - hit_record.point),
+                depth - 1,
             );
     }
 
