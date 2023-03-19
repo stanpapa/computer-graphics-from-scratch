@@ -1,0 +1,209 @@
+use std::ops::{Add, Div, Index, Mul, Neg, Sub};
+
+// use rand::Rng;
+
+pub trait DotProduct {
+    type Output;
+
+    fn dot(&self, rhs: &Self) -> Self::Output;
+}
+
+pub trait CrossProduct {
+    type Output;
+
+    fn cross(&self, rhs: &Self) -> Self::Output;
+}
+
+pub trait Length {
+    type Output;
+
+    fn length(&self) -> Self::Output;
+    fn length_squared(&self) -> Self::Output;
+}
+
+pub trait Normalize {
+    type Output;
+
+    fn normalize(&self) -> Self::Output;
+}
+
+pub trait Rotate {
+    fn rotate(&mut self, rotation_matrix: [[f64; 3]; 3]);
+}
+
+#[derive(PartialEq, Copy, Clone)]
+pub struct Vec3 {
+    p: [f64; 3],
+}
+
+impl Vec3 {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Self { p: [x, y, z] }
+    }
+
+    // pub const fn new_const(x: f64, y: f64, z: f64) -> Self {
+    //     Self { p: [x, y, z] }
+    // }
+
+    // fn random(min: f64, max: f64) -> Self {
+    //     let mut rng = rand::thread_rng();
+
+    //     Vec3::new(
+    //         rng.gen_range(min..max),
+    //         rng.gen_range(min..max),
+    //         rng.gen_range(min..max),
+    //     )
+    // }
+
+    // pub fn random_in_unit_sphere() -> Self {
+    //     loop {
+    //         let p = Vec3::random(-1., 1.);
+    //         if p.length_squared() < 1. {
+    //             return p;
+    //         }
+    //     }
+    // }
+
+    // pub fn random_in_unit_disk() -> Self {
+    //     let mut rng = rand::thread_rng();
+
+    //     loop {
+    //         let p = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.);
+    //         if p.length_squared() < 1. {
+    //             return p;
+    //         }
+    //     }
+    // }
+
+    // /// return true if the vector is near 0 in all dimensions
+    // pub fn near_zero(&self) -> bool {
+    //     let threshold = 1e-8;
+    //     self[0].abs() < threshold && self[1].abs() < threshold && self[2].abs() < threshold
+    // }
+}
+
+impl Index<usize> for Vec3 {
+    type Output = f64;
+
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.p[i]
+    }
+}
+
+impl Normalize for Vec3 {
+    type Output = Self;
+
+    fn normalize(&self) -> Self::Output {
+        let n = self.length();
+
+        Self::Output {
+            p: [self[0] / n, self[1] / n, self[2] / n],
+        }
+    }
+}
+
+impl Rotate for Vec3 {
+    fn rotate(&mut self, rotation_matrix: [[f64; 3]; 3]) {
+        let mut rotated = [0.0; 3];
+
+        for i in 0..3 {
+            for j in 0..3 {
+                rotated[i] += rotation_matrix[i][j] * self[j];
+            }
+        }
+
+        self.p = rotated;
+    }
+}
+
+impl Add for Vec3 {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::Output {
+            p: [self[0] + rhs[0], self[1] + rhs[1], self[2] + rhs[2]],
+        }
+    }
+}
+
+impl Div<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Self::Output {
+            p: [self[0] / rhs, self[1] / rhs, self[2] / rhs],
+        }
+    }
+}
+
+impl Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Self::Output {
+            p: [self * rhs[0], self * rhs[1], self * rhs[2]],
+        }
+    }
+}
+
+impl Mul<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Self::Output {
+        Self::Output {
+            p: [-self.p[0], -self.p[1], -self.p[2]],
+        }
+    }
+}
+
+impl Sub for Vec3 {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            p: [self[0] - rhs[0], self[1] - rhs[1], self[2] - rhs[2]],
+        }
+    }
+}
+
+impl DotProduct for Vec3 {
+    type Output = f64;
+
+    fn dot(&self, rhs: &Self) -> Self::Output {
+        self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
+    }
+}
+
+impl CrossProduct for Vec3 {
+    type Output = Self;
+
+    fn cross(&self, rhs: &Self) -> Self::Output {
+        Self::Output {
+            p: [
+                self[1] * rhs[2] - self[2] * rhs[1],
+                self[2] * rhs[0] - self[0] * rhs[2],
+                self[0] * rhs[1] - self[1] * rhs[0],
+            ],
+        }
+    }
+}
+
+impl Length for Vec3 {
+    type Output = f64;
+
+    fn length(&self) -> Self::Output {
+        self.dot(self).sqrt()
+    }
+
+    fn length_squared(&self) -> Self::Output {
+        self.dot(self)
+    }
+}
