@@ -6,6 +6,21 @@ pub struct Line {
     color: Color,
 }
 
+fn interpolate(i0: f64, i1: f64, d0: f64, d1: f64) -> Vec<f64> {
+    let mut values = Vec::new();
+
+    let a = (d1 - d0) / (i1 - i0);
+    let mut d = d0;
+
+    for i in i0 as isize..=i1 as isize {
+        values.push(d);
+
+        d += a;
+    }
+
+    values
+}
+
 impl Line {
     pub fn new(begin: Vec3, end: Vec3, color: Color) -> Self {
         Self { begin, end, color }
@@ -23,19 +38,20 @@ impl Line {
             } else {
                 (self.begin, self.end)
             };
-            let a = dy / dx;
-            let mut y = p0[1];
 
-            for x in p0[0] as isize..=p1[0] as isize {
+            let ys = interpolate(p0[0], p1[0], p0[1], p1[1]);
+            let x0 = p0[0] as isize;
+            let x1 = p1[0] as isize;
+
+            for x in x0..=x1 {
+                // todo: check for correctness
                 let x_corrected = (x + width as isize / 2) as usize;
-                let y_corrected = (height as isize / 2 - y as isize) as usize;
+                let y_corrected = (height as isize / 2 - ys[(x - x0) as usize] as isize) as usize;
                 let pos = y_corrected * width * 3 + x_corrected;
 
                 pixels[pos] = c[0];
                 pixels[pos + 1] = c[1];
                 pixels[pos + 2] = c[2];
-
-                y += a;
             }
         } else {
             // line is vertical-ish
@@ -44,19 +60,20 @@ impl Line {
             } else {
                 (self.begin, self.end)
             };
-            let a = dx / dy;
-            let mut x = p0[0];
 
-            for y in p0[1] as isize..=p1[1] as isize {
-                let x_corrected = (x as isize + width as isize / 2) as usize;
+            let xs = interpolate(p0[1], p1[1], p0[0], p1[0]);
+            let y0 = p0[1] as isize;
+            let y1 = p1[1] as isize;
+
+            for y in y0..=y1 {
+                // todo: check for correctness
+                let x_corrected = (xs[(y - y0) as usize] as isize + width as isize / 2) as usize;
                 let y_corrected = (height as isize / 2 - y) as usize;
                 let pos = y_corrected * width * 3 + x_corrected;
 
                 pixels[pos] = c[0];
                 pixels[pos + 1] = c[1];
                 pixels[pos + 2] = c[2];
-
-                x += a;
             }
         }
     }
