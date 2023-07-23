@@ -1,4 +1,8 @@
-use crate::{color::Color, line::Line, vec3::Vec3};
+use crate::{
+    color::Color,
+    object::{FilledTriangle, Line, Object, Triangle},
+    vec3::Vec3,
+};
 
 // use rand::Rng;
 
@@ -12,7 +16,7 @@ pub struct Scene {
     // camera
     // pub camera: Camera,
     // world
-    pub objects: Vec<Line>,
+    pub objects: Vec<Object>,
 }
 
 impl Default for Scene {
@@ -45,16 +49,47 @@ impl Default for Scene {
             // depth_max,
             // camera,
             objects: vec![
-                Line::new(
+                Object::Line(Line::new(
                     Vec3::new(-200., -100., 0.),
                     Vec3::new(240., 120., 0.),
                     Color::black(),
-                ),
-                Line::new(
+                )),
+                Object::Line(Line::new(
                     Vec3::new(-50., -200., 0.),
                     Vec3::new(60., 240., 0.),
                     Color::black(),
-                ),
+                )),
+            ],
+        }
+    }
+}
+
+impl Scene {
+    pub fn new_triangle() -> Self {
+        let aspect_ratio = 3. / 2.;
+        let image_width: usize = 1200;
+        let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+
+        Self {
+            aspect_ratio,
+            width: image_width,
+            height: image_height,
+            // samples_per_pixel,
+            // depth_max,
+            // camera,
+            objects: vec![
+                Object::FilledTriangle(FilledTriangle::new(
+                    Vec3::new(-200., -250., 0.),
+                    Vec3::new(200., 50., 0.),
+                    Vec3::new(20., 250., 0.),
+                    Color::green(),
+                )),
+                Object::Triangle(Triangle::new(
+                    Vec3::new(-200., -250., 0.),
+                    Vec3::new(200., 50., 0.),
+                    Vec3::new(20., 250., 0.),
+                    Color::black(),
+                )),
             ],
         }
     }

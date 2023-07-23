@@ -1,4 +1,4 @@
-use crate::{color::Color, line, scene::Scene};
+use crate::{draw::Draw, scene::Scene};
 
 use std::fs::File;
 
@@ -16,7 +16,7 @@ pub fn render(scene: &Scene, filename: &str) -> Result<(), Box<dyn std::error::E
     scene
         .objects
         .iter()
-        .for_each(|line| line.draw(&mut pixels, scene.width, scene.height));
+        .for_each(|object| object.draw(&mut pixels, scene.width, scene.height));
 
     write_image(filename, &pixels, scene.width, scene.height)
         .expect("Failed to write image to file");

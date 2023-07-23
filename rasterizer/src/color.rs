@@ -30,6 +30,10 @@ impl Color {
         Self(0., 0., 0.)
     }
 
+    pub const fn green() -> Self {
+        Self(0., 1., 0.)
+    }
+
     // pub fn random() -> Self {
     //     let mut rng = rand::thread_rng();
     //     Self(rng.gen(), rng.gen(), rng.gen())
