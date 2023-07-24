@@ -1,6 +1,6 @@
 use crate::{
     color::Color,
-    object::{FilledTriangle, Line, Object, ShadedTriangle, Triangle},
+    object::{FilledTriangle, Line, Object, ShadedTriangle, Triangle, WireframeCube},
     vec3::Vec3,
     vec4::Vec4,
 };
@@ -8,12 +8,12 @@ use crate::{
 pub struct Scene {
     // image
     pub aspect_ratio: f64,
+    // canvas
     pub width: usize,
     pub height: usize,
-    // pub samples_per_pixel: usize,
-    // pub depth_max: isize,
     // camera
-    // pub camera: Camera,
+    pub viewport_size: usize,
+    pub projection_plane_z: f64,
     // world
     pub objects: Vec<Object>,
 }
@@ -24,29 +24,13 @@ impl Default for Scene {
         let aspect_ratio = 3. / 2.;
         let image_width: usize = 1200;
         let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
-        // let samples_per_pixel = 500;
-        // let depth_max = 50;
-
-        // camera
-        // let look_from = Point3D::new(13., 2., 3.);
-        // let look_at = Point3D::new(0., 0., 0.);
-        // let camera = Camera::new(
-        //     look_from,
-        //     look_at,
-        //     Point3D::new(0., 1., 0.),
-        //     20.,
-        //     aspect_ratio,
-        //     0.1,
-        //     10.,
-        // );
 
         Self {
             aspect_ratio,
             width: image_width,
             height: image_height,
-            // samples_per_pixel,
-            // depth_max,
-            // camera,
+            viewport_size: 1,
+            projection_plane_z: 1.,
             objects: vec![
                 Object::Line(Line::new(
                     Vec3::new(-200., -100., 0.),
@@ -73,9 +57,8 @@ impl Scene {
             aspect_ratio,
             width: image_width,
             height: image_height,
-            // samples_per_pixel,
-            // depth_max,
-            // camera,
+            viewport_size: 1,
+            projection_plane_z: 1.,
             objects: vec![
                 Object::FilledTriangle(FilledTriangle::new(
                     Vec3::new(-200., -250., 0.),
@@ -102,15 +85,25 @@ impl Scene {
             aspect_ratio,
             width: image_width,
             height: image_height,
-            // samples_per_pixel,
-            // depth_max,
-            // camera,
+            viewport_size: 1,
+            projection_plane_z: 1.,
             objects: vec![Object::ShadedTriangle(ShadedTriangle::new(
                 Vec4::new(-200., -250., 0., 0.3),
                 Vec4::new(200., 50., 0., 0.1),
                 Vec4::new(20., 250., 0., 1.),
                 Color::green(),
             ))],
+        }
+    }
+
+    pub fn new_wireframe_cube() -> Self {
+        Self {
+            aspect_ratio: 1.,
+            width: 600,
+            height: 600,
+            viewport_size: 1,
+            projection_plane_z: 1.,
+            objects: vec![Object::WireframeCube(WireframeCube::default())],
         }
     }
 }

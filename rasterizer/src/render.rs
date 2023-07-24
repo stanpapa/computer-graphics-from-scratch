@@ -11,12 +11,16 @@ use image::{codecs::png::PngEncoder, ColorType, ImageEncoder};
 
 pub fn render(scene: &Scene, filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut pixels = vec![255; scene.width * scene.height * 3];
-    // let lines: Vec<(usize, &mut [u8])> = pixels.chunks_mut(scene.width * 3).enumerate().collect();
 
-    scene
-        .objects
-        .iter()
-        .for_each(|object| object.draw(&mut pixels, scene.width, scene.height));
+    scene.objects.iter().for_each(|object| {
+        object.draw(
+            &mut pixels,
+            scene.width,
+            scene.height,
+            scene.viewport_size,
+            scene.projection_plane_z,
+        )
+    });
 
     write_image(filename, &pixels, scene.width, scene.height)
         .expect("Failed to write image to file");

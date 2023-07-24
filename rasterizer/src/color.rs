@@ -30,27 +30,17 @@ impl Color {
         Self(0., 0., 0.)
     }
 
+    pub const fn red() -> Self {
+        Self(1., 0., 0.)
+    }
+
     pub const fn green() -> Self {
         Self(0., 1., 0.)
     }
 
-    // pub fn random() -> Self {
-    //     let mut rng = rand::thread_rng();
-    //     Self(rng.gen(), rng.gen(), rng.gen())
-    // }
-
-    // pub fn random_range(min: f32, max: f32) -> Self {
-    //     let mut rng = rand::thread_rng();
-    //     Self(
-    //         rng.gen_range(min..max),
-    //         rng.gen_range(min..max),
-    //         rng.gen_range(min..max),
-    //     )
-    // }
-
-    // fn sqrt(&self) -> Self {
-    //     Self(self.0.sqrt(), self.1.sqrt(), self.2.sqrt())
-    // }
+    pub const fn blue() -> Self {
+        Self(0., 0., 1.)
+    }
 
     pub fn to_bytes(self, samples: usize) -> [u8; 3] {
         // sqrt is for gamma correction (= 2)
@@ -162,6 +152,6 @@ mod tests {
     fn mul() {
         let c = Color(11., 19., 234.);
 
-        assert_eq!((1.3 * c).to_bytes(1), [14, 25, 255]);
+        assert_eq!((1.3f64 * c).to_bytes(1), [14, 25, 255]);
     }
 }
