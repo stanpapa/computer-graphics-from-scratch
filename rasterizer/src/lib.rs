@@ -4,3 +4,4 @@ pub mod object;
 pub mod render;
 pub mod scene;
 pub mod vec3;
+pub mod vec4;

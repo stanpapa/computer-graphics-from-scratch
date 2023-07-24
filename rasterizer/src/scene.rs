@@ -1,10 +1,9 @@
 use crate::{
     color::Color,
-    object::{FilledTriangle, Line, Object, Triangle},
+    object::{FilledTriangle, Line, Object, ShadedTriangle, Triangle},
     vec3::Vec3,
+    vec4::Vec4,
 };
-
-// use rand::Rng;
 
 pub struct Scene {
     // image
@@ -65,7 +64,7 @@ impl Default for Scene {
 }
 
 impl Scene {
-    pub fn new_triangle() -> Self {
+    pub fn new_filled_triangle() -> Self {
         let aspect_ratio = 3. / 2.;
         let image_width: usize = 1200;
         let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
@@ -91,6 +90,27 @@ impl Scene {
                     Color::black(),
                 )),
             ],
+        }
+    }
+
+    pub fn new_shaded_triangle() -> Self {
+        let aspect_ratio = 3. / 2.;
+        let image_width: usize = 1200;
+        let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+
+        Self {
+            aspect_ratio,
+            width: image_width,
+            height: image_height,
+            // samples_per_pixel,
+            // depth_max,
+            // camera,
+            objects: vec![Object::ShadedTriangle(ShadedTriangle::new(
+                Vec4::new(-200., -250., 0., 0.3),
+                Vec4::new(200., 50., 0., 0.1),
+                Vec4::new(20., 250., 0., 1.),
+                Color::green(),
+            ))],
         }
     }
 }
