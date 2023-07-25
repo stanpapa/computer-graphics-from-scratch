@@ -1,6 +1,9 @@
 use crate::{
     color::Color,
-    object::{FilledTriangle, Line, Object, ShadedTriangle, Triangle, WireframeCube},
+    object::{
+        FilledTriangle, Line, Object, ShadedTriangle, WireframeCube, WireframeObject,
+        WireframeTriangle,
+    },
     vec3::Vec3,
     vec4::Vec4,
 };
@@ -66,7 +69,7 @@ impl Scene {
                     Vec3::new(20., 250., 0.),
                     Color::green(),
                 )),
-                Object::Triangle(Triangle::new(
+                Object::WireframeTriangle(WireframeTriangle::new(
                     Vec3::new(-200., -250., 0.),
                     Vec3::new(200., 50., 0.),
                     Vec3::new(20., 250., 0.),
@@ -104,6 +107,17 @@ impl Scene {
             viewport_size: 1,
             projection_plane_z: 1.,
             objects: vec![Object::WireframeCube(WireframeCube::default())],
+        }
+    }
+
+    pub fn new_wireframe_object() -> Self {
+        Self {
+            aspect_ratio: 1.,
+            width: 600,
+            height: 600,
+            viewport_size: 1,
+            projection_plane_z: 1.,
+            objects: vec![Object::WireframeObject(WireframeObject::new_cube())],
         }
     }
 }

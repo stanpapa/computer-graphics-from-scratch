@@ -2,10 +2,11 @@ use crate::{color::Color, draw::Draw, vec3::Vec3, vec4::Vec4};
 
 pub enum Object {
     Line(Line),
-    Triangle(Triangle),
+    WireframeTriangle(WireframeTriangle),
     FilledTriangle(FilledTriangle),
     ShadedTriangle(ShadedTriangle),
     WireframeCube(WireframeCube),
+    WireframeObject(WireframeObject),
 }
 
 impl Draw for Object {
@@ -19,7 +20,9 @@ impl Draw for Object {
     ) {
         match self {
             Object::Line(l) => l.draw(pixels, width, height, viewport_size, projection_plane_z),
-            Object::Triangle(t) => t.draw(pixels, width, height, viewport_size, projection_plane_z),
+            Object::WireframeTriangle(t) => {
+                t.draw(pixels, width, height, viewport_size, projection_plane_z)
+            }
             Object::FilledTriangle(ft) => {
                 ft.draw(pixels, width, height, viewport_size, projection_plane_z)
             }
@@ -28,6 +31,9 @@ impl Draw for Object {
             }
             Object::WireframeCube(wc) => {
                 wc.draw(pixels, width, height, viewport_size, projection_plane_z)
+            }
+            Object::WireframeObject(wo) => {
+                wo.draw(pixels, width, height, viewport_size, projection_plane_z)
             }
         }
     }
@@ -151,20 +157,20 @@ impl Draw for Line {
     }
 }
 
-pub struct Triangle {
+pub struct WireframeTriangle {
     p0: Vec3,
     p1: Vec3,
     p2: Vec3,
     color: Color,
 }
 
-impl Triangle {
+impl WireframeTriangle {
     pub fn new(p0: Vec3, p1: Vec3, p2: Vec3, color: Color) -> Self {
         Self { p0, p1, p2, color }
     }
 }
 
-impl Draw for Triangle {
+impl Draw for WireframeTriangle {
     fn draw(
         &self,
         pixels: &mut [u8],
@@ -509,5 +515,77 @@ impl Draw for WireframeCube {
             Color::green(),
         )
         .draw(pixels, width, height, viewport_size, projection_plane_z);
+    }
+}
+
+pub struct WireframeObject {
+    vertices: Vec<Vec3>,
+    triangles: Vec<(usize, usize, usize, Color)>,
+}
+
+impl WireframeObject {
+    pub fn new_cube() -> Self {
+        let mut vertices = vec![
+            Vec3::new(1., 1., 1.),
+            Vec3::new(-1., 1., 1.),
+            Vec3::new(-1., -1., 1.),
+            Vec3::new(1., -1., 1.),
+            Vec3::new(1., 1., -1.),
+            Vec3::new(-1., 1., -1.),
+            Vec3::new(-1., -1., -1.),
+            Vec3::new(1., -1., -1.),
+        ];
+
+        // translate vertices
+        for v in &mut vertices {
+            *v += Vec3::new(-1.5, 0., 7.);
+        }
+
+        Self {
+            vertices,
+            triangles: vec![
+                (0, 1, 2, Color::red()),
+                (0, 2, 3, Color::red()),
+                (4, 0, 3, Color::green()),
+                (4, 3, 7, Color::green()),
+                (5, 4, 7, Color::blue()),
+                (5, 7, 6, Color::blue()),
+                (1, 5, 6, Color::yellow()),
+                (1, 6, 2, Color::yellow()),
+                (4, 5, 1, Color::purple()),
+                (4, 1, 0, Color::purple()),
+                (2, 6, 7, Color::cyan()),
+                (2, 7, 3, Color::cyan()),
+            ],
+        }
+    }
+}
+
+impl Draw for WireframeObject {
+    fn draw(
+        &self,
+        pixels: &mut [u8],
+        width: usize,
+        height: usize,
+        viewport_size: usize,
+        projection_plane_z: f64,
+    ) {
+        // project vertices
+        let projected: Vec<Vec3> = self
+            .vertices
+            .iter()
+            .map(|v| project_vertex(v, width, height, viewport_size, projection_plane_z))
+            .collect();
+
+        // construct and draw projected triangles
+        for (v0, v1, v2, color) in self.triangles.iter() {
+            WireframeTriangle::new(projected[*v0], projected[*v1], projected[*v2], *color).draw(
+                pixels,
+                width,
+                height,
+                viewport_size,
+                projection_plane_z,
+            );
+        }
     }
 }

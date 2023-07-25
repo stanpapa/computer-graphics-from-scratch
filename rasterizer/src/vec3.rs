@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Index, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
 
 // use rand::Rng;
 
@@ -31,7 +31,7 @@ pub trait Rotate {
     fn rotate(&mut self, rotation_matrix: [[f64; 3]; 3]);
 }
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub struct Vec3 {
     p: [f64; 3],
 }
@@ -40,46 +40,6 @@ impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { p: [x, y, z] }
     }
-
-    // pub const fn new_const(x: f64, y: f64, z: f64) -> Self {
-    //     Self { p: [x, y, z] }
-    // }
-
-    // fn random(min: f64, max: f64) -> Self {
-    //     let mut rng = rand::thread_rng();
-
-    //     Vec3::new(
-    //         rng.gen_range(min..max),
-    //         rng.gen_range(min..max),
-    //         rng.gen_range(min..max),
-    //     )
-    // }
-
-    // pub fn random_in_unit_sphere() -> Self {
-    //     loop {
-    //         let p = Vec3::random(-1., 1.);
-    //         if p.length_squared() < 1. {
-    //             return p;
-    //         }
-    //     }
-    // }
-
-    // pub fn random_in_unit_disk() -> Self {
-    //     let mut rng = rand::thread_rng();
-
-    //     loop {
-    //         let p = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.);
-    //         if p.length_squared() < 1. {
-    //             return p;
-    //         }
-    //     }
-    // }
-
-    // /// return true if the vector is near 0 in all dimensions
-    // pub fn near_zero(&self) -> bool {
-    //     let threshold = 1e-8;
-    //     self[0].abs() < threshold && self[1].abs() < threshold && self[2].abs() < threshold
-    // }
 }
 
 impl Index<usize> for Vec3 {
@@ -87,6 +47,12 @@ impl Index<usize> for Vec3 {
 
     fn index(&self, i: usize) -> &Self::Output {
         &self.p[i]
+    }
+}
+
+impl IndexMut<usize> for Vec3 {
+    fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+        &mut self.p[i]
     }
 }
 
@@ -123,6 +89,14 @@ impl Add for Vec3 {
         Self::Output {
             p: [self[0] + rhs[0], self[1] + rhs[1], self[2] + rhs[2]],
         }
+    }
+}
+
+impl AddAssign for Vec3 {
+    fn add_assign(&mut self, rhs: Self) {
+        self[0] += rhs[0];
+        self[1] += rhs[1];
+        self[2] += rhs[2];
     }
 }
 

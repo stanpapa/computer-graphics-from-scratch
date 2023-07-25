@@ -42,6 +42,18 @@ impl Color {
         Self(0., 0., 1.)
     }
 
+    pub const fn yellow() -> Self {
+        Self(1., 1., 0.)
+    }
+
+    pub const fn purple() -> Self {
+        Self(1., 0., 1.)
+    }
+
+    pub const fn cyan() -> Self {
+        Self(0., 1., 1.)
+    }
+
     pub fn to_bytes(self, samples: usize) -> [u8; 3] {
         // sqrt is for gamma correction (= 2)
         // let scaled = (self / samples as f32).sqrt();
