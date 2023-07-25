@@ -117,7 +117,10 @@ impl Scene {
             height: 600,
             viewport_size: 1,
             projection_plane_z: 1.,
-            objects: vec![Object::WireframeObject(WireframeObject::new_cube())],
+            objects: vec![
+                Object::WireframeObject(WireframeObject::new_cube(Vec3::new(-1.5, 0., 7.))),
+                Object::WireframeObject(WireframeObject::new_cube(Vec3::new(1.25, 2., 7.5))),
+            ],
         }
     }
 }

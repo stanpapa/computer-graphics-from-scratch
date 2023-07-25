@@ -524,7 +524,7 @@ pub struct WireframeObject {
 }
 
 impl WireframeObject {
-    pub fn new_cube() -> Self {
+    pub fn new_cube(position: Vec3) -> Self {
         let mut vertices = vec![
             Vec3::new(1., 1., 1.),
             Vec3::new(-1., 1., 1.),
@@ -538,7 +538,7 @@ impl WireframeObject {
 
         // translate vertices
         for v in &mut vertices {
-            *v += Vec3::new(-1.5, 0., 7.);
+            *v += position;
         }
 
         Self {
