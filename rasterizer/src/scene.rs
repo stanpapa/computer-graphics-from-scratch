@@ -10,13 +10,13 @@ use crate::{
 
 pub struct Scene {
     // image
-    pub aspect_ratio: f64,
+    pub aspect_ratio: f32,
     // canvas
     pub width: usize,
     pub height: usize,
     // camera
     pub viewport_size: usize,
-    pub projection_plane_z: f64,
+    pub projection_plane_z: f32,
     // world
     pub objects: Vec<Object>,
 }
@@ -26,7 +26,7 @@ impl Default for Scene {
         // image
         let aspect_ratio = 3. / 2.;
         let image_width: usize = 1200;
-        let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+        let image_height: usize = (image_width as f32 / aspect_ratio) as usize;
 
         Self {
             aspect_ratio,
@@ -54,7 +54,7 @@ impl Scene {
     pub fn new_filled_triangle() -> Self {
         let aspect_ratio = 3. / 2.;
         let image_width: usize = 1200;
-        let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+        let image_height: usize = (image_width as f32 / aspect_ratio) as usize;
 
         Self {
             aspect_ratio,
@@ -82,7 +82,7 @@ impl Scene {
     pub fn new_shaded_triangle() -> Self {
         let aspect_ratio = 3. / 2.;
         let image_width: usize = 1200;
-        let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+        let image_height: usize = (image_width as f32 / aspect_ratio) as usize;
 
         Self {
             aspect_ratio,

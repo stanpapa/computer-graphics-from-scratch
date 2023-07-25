@@ -16,7 +16,7 @@ impl Draw for Object {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     ) {
         match self {
             Object::Line(l) => l.draw(pixels, width, height, viewport_size, projection_plane_z),
@@ -39,7 +39,7 @@ impl Draw for Object {
     }
 }
 
-fn interpolate(i0: f64, i1: f64, d0: f64, d1: f64) -> Vec<f64> {
+fn interpolate(i0: f32, i1: f32, d0: f32, d1: f32) -> Vec<f32> {
     let mut values = Vec::new();
 
     let a = (d1 - d0) / (i1 - i0);
@@ -103,7 +103,7 @@ impl Draw for Line {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     ) {
         let dx = self.end[0] - self.begin[0];
         let dy = self.end[1] - self.begin[1];
@@ -177,7 +177,7 @@ impl Draw for WireframeTriangle {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     ) {
         Line::new(self.p0, self.p1, self.color).draw(
             pixels,
@@ -244,7 +244,7 @@ impl Draw for FilledTriangle {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     ) {
         // compute the x-coordinates of the triangle edges
         let mut x01 = interpolate(self.p0[1], self.p1[1], self.p0[0], self.p1[0]);
@@ -319,7 +319,7 @@ impl Draw for ShadedTriangle {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     ) {
         // compute the x-coordinates of the triangle edges
         let mut x01 = interpolate(self.p0[1], self.p1[1], self.p0[0], self.p1[0]);
@@ -400,11 +400,11 @@ impl Default for WireframeCube {
 }
 
 fn viewport_to_canvas(
-    x: f64,
-    y: f64,
-    canvas_width: f64,
-    canvas_height: f64,
-    viewport_size: f64,
+    x: f32,
+    y: f32,
+    canvas_width: f32,
+    canvas_height: f32,
+    viewport_size: f32,
 ) -> Vec3 {
     Vec3::new(
         x * canvas_width / viewport_size,
@@ -418,14 +418,14 @@ fn project_vertex(
     canvas_width: usize,
     canvas_height: usize,
     viewport_size: usize,
-    d: f64,
+    d: f32,
 ) -> Vec3 {
     viewport_to_canvas(
         v[0] * d / v[2],
         v[1] * d / v[2],
-        canvas_width as f64,
-        canvas_height as f64,
-        viewport_size as f64,
+        canvas_width as f32,
+        canvas_height as f32,
+        viewport_size as f32,
     )
 }
 
@@ -436,7 +436,7 @@ impl Draw for WireframeCube {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     ) {
         // draw front face
         Line::new(
@@ -568,7 +568,7 @@ impl Draw for WireframeObject {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     ) {
         // project vertices
         let projected: Vec<Vec3> = self

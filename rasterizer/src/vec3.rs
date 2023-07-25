@@ -28,22 +28,22 @@ pub trait Normalize {
 }
 
 pub trait Rotate {
-    fn rotate(&mut self, rotation_matrix: [[f64; 3]; 3]);
+    fn rotate(&mut self, rotation_matrix: [[f32; 3]; 3]);
 }
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct Vec3 {
-    p: [f64; 3],
+    p: [f32; 3],
 }
 
 impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { p: [x, y, z] }
     }
 }
 
 impl Index<usize> for Vec3 {
-    type Output = f64;
+    type Output = f32;
 
     fn index(&self, i: usize) -> &Self::Output {
         &self.p[i]
@@ -69,7 +69,7 @@ impl Normalize for Vec3 {
 }
 
 impl Rotate for Vec3 {
-    fn rotate(&mut self, rotation_matrix: [[f64; 3]; 3]) {
+    fn rotate(&mut self, rotation_matrix: [[f32; 3]; 3]) {
         let mut rotated = [0.0; 3];
 
         for i in 0..3 {
@@ -100,17 +100,17 @@ impl AddAssign for Vec3 {
     }
 }
 
-impl Div<f64> for Vec3 {
+impl Div<f32> for Vec3 {
     type Output = Vec3;
 
-    fn div(self, rhs: f64) -> Self::Output {
+    fn div(self, rhs: f32) -> Self::Output {
         Self::Output {
             p: [self[0] / rhs, self[1] / rhs, self[2] / rhs],
         }
     }
 }
 
-impl Mul<Vec3> for f64 {
+impl Mul<Vec3> for f32 {
     type Output = Vec3;
 
     fn mul(self, rhs: Vec3) -> Self::Output {
@@ -120,10 +120,10 @@ impl Mul<Vec3> for f64 {
     }
 }
 
-impl Mul<f64> for Vec3 {
+impl Mul<f32> for Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: f64) -> Self::Output {
+    fn mul(self, rhs: f32) -> Self::Output {
         rhs * self
     }
 }
@@ -149,7 +149,7 @@ impl Sub for Vec3 {
 }
 
 impl DotProduct for Vec3 {
-    type Output = f64;
+    type Output = f32;
 
     fn dot(&self, rhs: &Self) -> Self::Output {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
@@ -171,7 +171,7 @@ impl CrossProduct for Vec3 {
 }
 
 impl Length for Vec3 {
-    type Output = f64;
+    type Output = f32;
 
     fn length(&self) -> Self::Output {
         self.dot(self).sqrt()

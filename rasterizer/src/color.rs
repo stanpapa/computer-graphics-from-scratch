@@ -115,23 +115,6 @@ impl Mul<Color> for f32 {
     }
 }
 
-impl Mul<f64> for Color {
-    type Output = Self;
-
-    fn mul(self, rhs: f64) -> Self::Output {
-        let rhs_f32 = rhs as f32;
-        Self(self.0 * rhs_f32, self.1 * rhs_f32, self.2 * rhs_f32)
-    }
-}
-
-impl Mul<Color> for f64 {
-    type Output = Color;
-
-    fn mul(self, rhs: Color) -> Self::Output {
-        rhs * self
-    }
-}
-
 impl Sub for Color {
     type Output = Self;
 
@@ -164,6 +147,6 @@ mod tests {
     fn mul() {
         let c = Color(11., 19., 234.);
 
-        assert_eq!((1.3f64 * c).to_bytes(1), [14, 25, 255]);
+        assert_eq!((1.3 * c).to_bytes(1), [14, 25, 255]);
     }
 }

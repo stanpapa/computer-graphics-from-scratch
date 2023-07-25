@@ -5,6 +5,6 @@ pub trait Draw {
         width: usize,
         height: usize,
         viewport_size: usize,
-        projection_plane_z: f64,
+        projection_plane_z: f32,
     );
 }
